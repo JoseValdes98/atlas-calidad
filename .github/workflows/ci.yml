@@ -22,7 +22,7 @@ jobs:
     name: 1a · Secretos (Gitleaks)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0          # revisa TODO el historial, no solo el último cambio
       - name: Descargar Gitleaks
@@ -35,13 +35,13 @@ jobs:
     name: 1b · Dockerfiles (Hadolint)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Revisar Dockerfile del backend
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf # v3.1.0
         with:
           dockerfile: BACKEND/Dockerfile
       - name: Revisar Dockerfile del frontend
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf # v3.1.0
         with:
           dockerfile: FRONTEND/Dockerfile
 
@@ -53,12 +53,12 @@ jobs:
     needs: [secretos, dockerfiles]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0          # SonarQube necesita el historial completo
       - name: Encender la base de datos de pruebas
         run: docker compose up -d --wait atlas-postgres-et
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
           cache: npm
@@ -71,14 +71,14 @@ jobs:
         run: npm test -- --runInBand
       - name: Guardar reporte de cobertura
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: cobertura-backend
           path: BACKEND/coverage/
       - name: Ajustar rutas de cobertura para SonarQube
         run: sed -i 's#^SF:#SF:BACKEND/#' BACKEND/coverage/lcov.info
       - name: Análisis SonarQube Cloud y Quality Gate
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@2f77a1ec69fb1d595b06f35ab27e97605bdef703 # v5.3.2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
@@ -93,7 +93,7 @@ jobs:
     needs: [pruebas-codigo]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Construir y encender Atlas completo con Docker
         run: docker compose up -d --build --wait
       - name: Esperar a que el frontend responda
@@ -103,7 +103,7 @@ jobs:
             sleep 2
           done
           echo "El frontend no respondió a tiempo" && exit 1
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
 
@@ -118,7 +118,7 @@ jobs:
         run: npx playwright test
       - name: Guardar reporte de Playwright
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: reporte-playwright
           path: pruebas-e2e/playwright-report/
@@ -143,7 +143,7 @@ jobs:
             zap-api-scan.py -t http://localhost:4451/openapi.json -f openapi -r zap-api.html -I
       - name: Guardar reportes de ZAP
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: reportes-zap
           path: zap/
@@ -164,17 +164,17 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Preparar nombre del dueño en minúsculas
         run: echo "OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
       - name: Iniciar sesión en GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Construir y publicar imagen del backend
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: ./BACKEND
           push: true
@@ -182,7 +182,7 @@ jobs:
             ghcr.io/${{ env.OWNER }}/atlas-backend:latest
             ghcr.io/${{ env.OWNER }}/atlas-backend:${{ github.sha }}
       - name: Construir y publicar imagen del frontend
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: ./FRONTEND
           push: true
