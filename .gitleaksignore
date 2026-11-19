@@ -1,0 +1,2 @@
+# Falso positivo revisado: sonar.projectKey es un identificador público de SonarQube Cloud, no un secreto.
+60f68a694631001e4d18c597946bb1515d25ff36:sonar-project.properties:generic-api-key:3
