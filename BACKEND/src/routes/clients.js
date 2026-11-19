@@ -308,13 +308,13 @@ router.delete("/:id", async (req, res) => {
       });
     }
 
-    // RB-4 / RB-5: solo un administrador puede eliminar clientes
-    if (authUser.rolNombre !== "administrador") {
-      return res.status(403).json({
-        error: "Acción no permitida",
-        glosa: "Solo un administrador puede eliminar clientes",
-      });
-    }
+    // RB-4 / RB-5: solo un administrador puede eliminar clientes   [EXPERIMENTO A: control desactivado a propósito]
+    // if (authUser.rolNombre !== "administrador") {
+    // return res.status(403).json({
+    // error: "Acción no permitida",
+    // glosa: "Solo un administrador puede eliminar clientes",
+    // });
+    // }
 
     const result = await pool.query(
       "DELETE FROM clientes WHERE id=$1 AND empresa_id = $2 RETURNING *",
